@@ -7,12 +7,17 @@ package Login;
 
 import Admin.AdminDSB;
 import Config.DBConnector;
+import Config.Session;
+import Config.passwordHashing;
 import Reg.RegDSB;
 import User.UserDSB;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -28,54 +33,52 @@ public class LoginDSB extends javax.swing.JFrame {
     public LoginDSB() {
         initComponents();
     }
-       public static boolean loginAccount(String username, String password) {
-        try (Connection cn = new DBConnector().getConnection()) {
 
-            PreparedStatement checkStmt = cn.prepareStatement("SELECT COUNT(*) FROM yang WHERE user = ? AND pass = ? AND status = 'Active'");
-            checkStmt.setString(1, username);
-            checkStmt.setString(2, password);
-            ResultSet result = checkStmt.executeQuery();
-            result.next();
-            int count = result.getInt(1);
+    private static String xstatus, xtype;
 
-            return count > 0;
-
-        } catch (SQLException er) {
-            return false; 
+    private boolean loginDB(String email, String pass) throws SQLException {
+        ResultSet rs = new DBConnector().getData("select * from yang where email = '" + email + "' and pass = '" + pass + "'");
+        if (rs.next()) {
+            xstatus = rs.getString("status");
+            xtype = rs.getString("type");
+            Session cons = Session.getInstance();
+            cons.setId(rs.getString("id"));
+            cons.setEmail(rs.getString("email"));
+            cons.setUsername(rs.getString("user"));
+            cons.setPassword(rs.getString("pass"));
+            cons.setContact(rs.getString("contact"));
+            cons.setType(rs.getString("type"));
+            cons.setStatus(rs.getString("status"));
+            return true;
+        } else {
+            return false;
         }
     }
-      
-      public static void showTable(DefaultTableModel table) {
 
-        try {
-
-            ResultSet rs = new DBConnector().getData("SELECT * FROM yang");
-            while (rs.next()) {
-                table.addRow(new String[]{rs.getString("id"), rs.getString("email"), rs.getString("contact"), rs.getString("user"), rs.getString("pass"), rs.getString("status")});
-            }
-
-        } catch (SQLException er) {
-            System.out.println("Error: " + er.getMessage());
-        }
-
+    private void errorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "ERROR!", JOptionPane.ERROR_MESSAGE);
     }
 
- 
+    private void successMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "SUCCESS!", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jDialog1 = new javax.swing.JDialog();
+        password = new javax.swing.JPasswordField();
+        showPass = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        combo = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         user = new javax.swing.JTextField();
-        pass = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
         jDialog1.getContentPane().setLayout(jDialog1Layout);
@@ -89,24 +92,29 @@ public class LoginDSB extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(736, 455));
+        setUndecorated(true);
+        setPreferredSize(new java.awt.Dimension(736, 455));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().add(password, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 200, 220, 30));
+
+        showPass.setBackground(new java.awt.Color(255, 255, 255,50));
+        showPass.setFont(new java.awt.Font("Yu Gothic", 0, 11)); // NOI18N
+        showPass.setText("SHOW PASSWORD");
+        showPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showPassActionPerformed(evt);
+            }
+        });
+        getContentPane().add(showPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 360, -1, -1));
 
         jLabel1.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
         jLabel1.setText("User name:");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(73, 152, 106, 34));
 
         jLabel2.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
-        jLabel2.setText("User name:");
+        jLabel2.setText("Password:");
         getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(73, 197, 106, 34));
-
-        combo.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
-        combo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ADMIN", "USER" }));
-        combo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                comboActionPerformed(evt);
-            }
-        });
-        getContentPane().add(combo, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 250, -1, -1));
 
         jButton1.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
         jButton1.setText("LOGIN");
@@ -136,10 +144,7 @@ public class LoginDSB extends javax.swing.JFrame {
         getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 240, 149, 39));
 
         user.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
-        getContentPane().add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(237, 153, 219, 32));
-
-        pass.setFont(new java.awt.Font("Yu Gothic", 1, 12)); // NOI18N
-        getContentPane().add(pass, new org.netbeans.lib.awtextra.AbsoluteConstraints(237, 198, 219, 32));
+        getContentPane().add(user, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 150, 219, 32));
 
         jLabel4.setBackground(new java.awt.Color(51, 0, 255));
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
@@ -148,43 +153,60 @@ public class LoginDSB extends javax.swing.JFrame {
         jLabel4.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
         getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(223, 23, -1, 64));
 
-        jLabel5.setIcon(new javax.swing.ImageIcon("C:\\Users\\SCC-COLLEGE\\Downloads\\321.jpg")); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Login/321.jpg"))); // NOI18N
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 740, 470));
+
+        jLabel6.setText("jLabel6");
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        if (loginAccount(user.getText(), pass.getText())) {
-            
-            String selectedUser = (String) combo.getSelectedItem();
-
-            if ("USER".equals(selectedUser)) {
-                new UserDSB().setVisible(true);
-                dispose();
-            } else if ("ADMIN".equals(selectedUser)) {
-                new AdminDSB().setVisible(true);
-                dispose();
+        try {
+            String hashedPass = passwordHashing.hashPassword(password.getText());
+            if (loginDB(user.getText(), hashedPass)) {
+                if (xstatus.equalsIgnoreCase("pending")) {
+                    errorMessage("WAIT FOR ADMIN APPROVAL!");
+                } else if (xstatus.equalsIgnoreCase("declined")) {
+                    errorMessage("YOUR ACCOUNT HAS BEEN DECLINED!");
+                } else if (!xstatus.equalsIgnoreCase("active")) {
+                    errorMessage("YOUR ACCOUNT IS IN-ACTIVE!");
+                } else {
+                    successMessage("LOGIN SUCCESSFULLY!");
+                    if (xtype.equalsIgnoreCase("user")) {
+                        new UserDSB().setVisible(true);
+                        dispose();
+                    } else if (xtype.equalsIgnoreCase("admin")) {
+                        new AdminDSB().setVisible(true);
+                        dispose();
+                    } else {
+                        errorMessage("ACCOUNT TYPE INVALID!");
+                    }
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "ERROR: Invalid user type selected");
+                errorMessage("ACCOUNT NOT FOUND!");
             }
-        }else{
-            JOptionPane.showMessageDialog(this, "ERROR!");
-        }  
+        } catch (SQLException er) {
+            System.out.println("ERROR: " + er.getMessage());
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(LoginDSB.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
-     new RegDSB().setVisible(true); dispose();
+        new RegDSB().setVisible(true);
+        dispose();
     }//GEN-LAST:event_jLabel3MouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void comboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_comboActionPerformed
+    private void showPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showPassActionPerformed
+        password.setEchoChar(showPass.isSelected() ? (char) 0 : '*');
+    }//GEN-LAST:event_showPassActionPerformed
 
     /**
      * @param args the command line arguments
@@ -222,7 +244,6 @@ public class LoginDSB extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> combo;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JDialog jDialog1;
@@ -231,7 +252,9 @@ public class LoginDSB extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JTextField pass;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPasswordField password;
+    private javax.swing.JCheckBox showPass;
     private javax.swing.JTextField user;
     // End of variables declaration//GEN-END:variables
 }
