@@ -5,7 +5,12 @@
  */
 package User;
 
+import Config.DBConnector;
+import Config.Session;
 import Login.LoginDSB;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import net.proteanit.sql.DbUtils;
 
 /**
  *
@@ -18,6 +23,17 @@ public class UserDSB extends javax.swing.JFrame {
      */
     public UserDSB() {
         initComponents();
+        displayData();
+    }
+    
+    private void displayData() {
+        try {
+            Session yawa = Session.getInstance();
+            ResultSet rs = new DBConnector().getData("select id,user,email,contact,type,status from yang where status in ('active', 'inactive') and id != '" + yawa.getId() + "'");
+            jTable2.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (SQLException e) {
+            System.err.println("An error occurred while fetching data: " + e.getMessage());
+        }
     }
 
     /**

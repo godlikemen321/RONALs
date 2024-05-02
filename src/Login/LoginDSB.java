@@ -68,6 +68,7 @@ public class LoginDSB extends javax.swing.JFrame {
     private void initComponents() {
 
         jDialog1 = new javax.swing.JDialog();
+        jLabel5 = new javax.swing.JLabel();
         password = new javax.swing.JPasswordField();
         showPass = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
@@ -77,7 +78,6 @@ public class LoginDSB extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         user = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
@@ -90,6 +90,8 @@ public class LoginDSB extends javax.swing.JFrame {
             jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 300, Short.MAX_VALUE)
         );
+
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Login/321.jpg"))); // NOI18N
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(736, 455));
@@ -153,11 +155,8 @@ public class LoginDSB extends javax.swing.JFrame {
         jLabel4.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
         getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(223, 23, -1, 64));
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Login/321.jpg"))); // NOI18N
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 740, 470));
-
-        jLabel6.setText("jLabel6");
-        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Login/321.jpg"))); // NOI18N
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 740, 460));
 
         pack();
         setLocationRelativeTo(null);
